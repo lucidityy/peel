@@ -3,6 +3,7 @@ const fs = require("node:fs/promises");
 const fsSync = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
+const https = require("node:https");
 const { spawn } = require("node:child_process");
 const ffmpegPath = require("ffmpeg-static");
 const compression = require("compression");
@@ -11,11 +12,11 @@ const sanitizeFilename = require("sanitize-filename");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const TMP_DIR = path.join(os.tmpdir(), "peel-downloads");
+const BIN_DIR = path.join(os.tmpdir(), "peel-bin");
 
 const IS_WIN = process.platform === "win32";
 const YTDLP_PATH = path.join(
-  __dirname,
-  "bin",
+  BIN_DIR,
   IS_WIN ? "yt-dlp.exe" : "yt-dlp"
 );
 
@@ -26,9 +27,71 @@ const STALE_FILE_MAX_AGE_MS = 30 * 60 * 1000;
 const CLEANUP_INTERVAL_MS = 10 * 60 * 1000;
 
 let activeJobs = 0;
+let ytDlpSetupPromise = null;
 
 if (!ffmpegPath) {
   throw new Error("ffmpeg-static binary not found.");
+}
+
+function downloadFile(url, destPath) {
+  return new Promise((resolve, reject) => {
+    const file = fsSync.createWriteStream(destPath);
+    https
+      .get(url, (res) => {
+        if (
+          res.statusCode >= 300 &&
+          res.statusCode < 400 &&
+          res.headers.location
+        ) {
+          file.close();
+          fsSync.unlink(destPath, () => {});
+          downloadFile(res.headers.location, destPath)
+            .then(resolve)
+            .catch(reject);
+          return;
+        }
+        if (res.statusCode !== 200) {
+          file.close();
+          fsSync.unlink(destPath, () => {});
+          reject(new Error(`yt-dlp download HTTP ${res.statusCode}`));
+          return;
+        }
+        res.pipe(file);
+        file.on("finish", () => {
+          file.close(() => resolve());
+        });
+      })
+      .on("error", (err) => {
+        file.close();
+        fsSync.unlink(destPath, () => {});
+        reject(err);
+      });
+  });
+}
+
+async function ensureYtDlpBinary() {
+  if (fsSync.existsSync(YTDLP_PATH)) return;
+  if (ytDlpSetupPromise) {
+    await ytDlpSetupPromise;
+    return;
+  }
+
+  ytDlpSetupPromise = (async () => {
+    await fs.mkdir(BIN_DIR, { recursive: true });
+    const fileName = IS_WIN ? "yt-dlp.exe" : "yt-dlp";
+    const url = `https://github.com/yt-dlp/yt-dlp/releases/latest/download/${fileName}`;
+    await downloadFile(url, YTDLP_PATH);
+    if (!IS_WIN) {
+      await fs.chmod(YTDLP_PATH, 0o755);
+    }
+    console.log("[peel] yt-dlp is ready.");
+  })();
+
+  try {
+    await ytDlpSetupPromise;
+  } finally {
+    ytDlpSetupPromise = null;
+  }
 }
 
 /* ═══════════ SECURITY HEADERS ═══════════ */
@@ -223,9 +286,7 @@ app.post("/api/download", async (req, res) => {
   let outputPath = "";
 
   try {
-    if (!fsSync.existsSync(YTDLP_PATH)) {
-      throw new Error("yt-dlp binary is missing on the server.");
-    }
+    await ensureYtDlpBinary();
 
     await fs.mkdir(TMP_DIR, { recursive: true });
 
