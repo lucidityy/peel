@@ -1,0 +1,6 @@
+node_modules/
+bin/
+*.mp3
+*-player-script.js
+.env
+.vscode/

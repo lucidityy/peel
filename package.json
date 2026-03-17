@@ -1,0 +1,21 @@
+{
+  "name": "peel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Peel — extract high-quality MP3 audio from YouTube videos",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js",
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "compression": "^1.8.1",
+    "express": "^4.21.2",
+    "ffmpeg-static": "^5.2.0",
+    "sanitize-filename": "^1.6.3"
+  }
+}
