@@ -97,7 +97,6 @@ const statusMsg = statusEl.querySelector(".status-msg");
 const button = document.getElementById("download-btn");
 const btnText = button.querySelector(".btn-text");
 
-const API_BASE = window.__API_URL__ || "";
 const YOUTUBE_RE =
   /^https?:\/\/(www\.)?(youtube\.com|youtu\.be|m\.youtube\.com|music\.youtube\.com)\//;
 const FETCH_TIMEOUT_MS = 180_000;
@@ -146,7 +145,7 @@ form.addEventListener("submit", async (e) => {
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
   try {
-    const res = await fetch(API_BASE + "/api/download", {
+    const res = await fetch("/api/download", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url }),
