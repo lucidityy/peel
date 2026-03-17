@@ -47,6 +47,25 @@ app.use((_req, res, next) => {
 });
 
 app.use(compression());
+
+const ALLOWED_ORIGINS = new Set([
+  "https://peelytmp3.com",
+  "https://www.peelytmp3.com",
+  "http://localhost:3000"
+]);
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && ALLOWED_ORIGINS.has(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+  }
+  if (req.method === "OPTIONS") return res.sendStatus(204);
+  next();
+});
+
 app.use(express.json({ limit: "4kb" }));
 app.use(
   express.static(path.join(__dirname, "public"), {
