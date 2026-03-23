@@ -13,9 +13,12 @@ Runs at `http://localhost:3000`.
 
 ## Deployment
 
-**This app requires a Node.js runtime** (Express + yt-dlp + ffmpeg). It does **not** run as Vercel static or serverless:
+**Full app** (Node + yt-dlp + ffmpeg) — use one of these:
 
-- **Static Vercel** (`vercel.json`): frontend only. Point the client to your API URL via env.
-- **Full app**: use [Railway](https://railway.app), [Render](https://render.com), [Fly.io](https://fly.io), or any host that runs `node server.js` with persistent storage for binaries.
+| Platform | Action |
+|----------|--------|
+| **[Render](https://render.com)** | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/lucidityy/peel) — Uses `render.yaml` + Dockerfile, free tier available |
+| **[Railway](https://railway.app)** | Connect [GitHub repo](https://github.com/lucidityy/peel), add new project → Deploy from GitHub. Set root directory, use Dockerfile. |
+| **[Fly.io](https://fly.io)** | `fly launch` then `fly deploy` (requires `flyctl` CLI) |
 
-`postinstall` downloads yt-dlp to `bin/`; the server uses it when present, otherwise fetches at runtime to `os.tmpdir()`.
+Code is pushed to `master`. Deploy requires interactive login (GitHub OAuth for Render/Railway).
