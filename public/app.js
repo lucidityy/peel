@@ -11,7 +11,7 @@ const revealObserver = new IntersectionObserver(
       }
     }
   },
-  { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+  { threshold: 0.08, rootMargin: "0px 0px -24px 0px" }
 );
 
 document.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el));
@@ -41,9 +41,9 @@ document.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el))
       x: Math.random() * w,
       y: Math.random() * h,
       r: Math.random() * 1.2 + 0.3,
-      dx: (Math.random() - 0.5) * 0.2,
-      dy: (Math.random() - 0.5) * 0.2,
-      o: Math.random() * 0.3 + 0.05
+      dx: (Math.random() - 0.5) * 0.12,
+      dy: (Math.random() - 0.5) * 0.12,
+      o: Math.random() * 0.28 + 0.06
     }));
   }
 

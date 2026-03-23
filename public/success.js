@@ -24,14 +24,15 @@
     w: Math.random() * 8 + 4,
     h: Math.random() * 4 + 2,
     rot: Math.random() * 360,
-    dx: (Math.random() - 0.5) * 2,
-    dy: Math.random() * 3 + 2,
-    dr: (Math.random() - 0.5) * 6,
+    dx: (Math.random() - 0.5) * 1.5,
+    dy: Math.random() * 2.5 + 2,
+    dr: (Math.random() - 0.5) * 4,
     color: COLORS[Math.floor(Math.random() * COLORS.length)],
     opacity: 1
   }));
 
   let frame = 0;
+  let rafId = 0;
 
   function draw() {
     ctx.clearRect(0, 0, w, h);
@@ -43,7 +44,7 @@
       p.x += p.dx;
       p.y += p.dy;
       p.rot += p.dr;
-      if (p.y > h * 0.85) p.opacity -= 0.02;
+      if (p.y > h * 0.8) p.opacity -= 0.012;
 
       ctx.save();
       ctx.translate(p.x, p.y);
@@ -56,9 +57,10 @@
 
     frame++;
     if (alive && frame < 300) {
-      requestAnimationFrame(draw);
+      rafId = requestAnimationFrame(draw);
     }
   }
 
   draw();
+  window.addEventListener("pagehide", () => cancelAnimationFrame(rafId));
 })();

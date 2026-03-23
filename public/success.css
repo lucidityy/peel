@@ -22,13 +22,13 @@
 /* ═══════════ POP-IN ANIMATION ═══════════ */
 
 .pop-in {
-  animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: popIn 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 @keyframes popIn {
   from {
     opacity: 0;
-    transform: scale(0.85) translateY(20px);
+    transform: scale(0.92) translateY(16px);
   }
   to {
     opacity: 1;
@@ -52,7 +52,7 @@
   display: grid;
   place-items: center;
   margin: 0 auto 24px;
-  animation: ringPulse 2s ease-in-out infinite;
+  animation: ringPulse 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 @keyframes ringPulse {
@@ -67,7 +67,7 @@
 .check-path {
   stroke-dasharray: 24;
   stroke-dashoffset: 24;
-  animation: drawCheck 0.5s 0.3s ease forwards;
+  animation: drawCheck 0.6s 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes drawCheck {
@@ -105,12 +105,14 @@
   background: var(--surface);
   border: 1px solid var(--border);
   text-decoration: none;
-  transition: border-color 0.25s, transform 0.15s, box-shadow 0.3s;
+  transition: border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-back:hover {
   border-color: rgba(123, 147, 255, 0.25);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.4);
 }
 
@@ -134,12 +136,14 @@
   text-decoration: none;
   color: var(--text);
   overflow: hidden;
-  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  transition: border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .community-card:hover {
   border-color: rgba(168, 85, 247, 0.35);
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   box-shadow: 0 24px 64px -16px rgba(168, 85, 247, 0.2);
 }
 
@@ -217,7 +221,7 @@
   font-size: 14px;
   font-weight: 700;
   color: #c084fc;
-  transition: gap 0.2s;
+  transition: gap 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .community-card:hover .community-btn { gap: 8px; }
@@ -281,11 +285,13 @@
   text-decoration: none;
   color: var(--text);
   overflow: hidden;
-  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  transition: border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .promo-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
   box-shadow: 0 20px 56px -12px rgba(0, 0, 0, 0.45);
 }
 
@@ -343,7 +349,7 @@
   margin-top: 16px;
   font-size: 13px;
   font-weight: 600;
-  transition: gap 0.2s;
+  transition: gap 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   gap: 2px;
@@ -360,9 +366,9 @@
 
 .slide-up {
   opacity: 0;
-  transform: translateY(28px);
-  animation: slideUp 0.5s ease-out forwards;
-  animation-delay: calc(0.4s + var(--d) * 0.1s);
+  transform: translateY(24px);
+  animation: slideUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(0.35s + var(--d) * 0.12s);
 }
 
 @keyframes slideUp {

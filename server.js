@@ -3,22 +3,24 @@ const fs = require("node:fs/promises");
 const fsSync = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
+const http = require("node:http");
 const https = require("node:https");
 const { spawn } = require("node:child_process");
 const ffmpegPath = require("ffmpeg-static");
 const compression = require("compression");
+const rateLimit = require("express-rate-limit");
 const sanitizeFilename = require("sanitize-filename");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const TMP_DIR = path.join(os.tmpdir(), "peel-downloads");
-const BIN_DIR = path.join(os.tmpdir(), "peel-bin");
-
 const IS_WIN = process.platform === "win32";
-const YTDLP_PATH = path.join(
-  BIN_DIR,
-  IS_WIN ? "yt-dlp.exe" : "yt-dlp"
-);
+const YTDLP_FILENAME = IS_WIN ? "yt-dlp.exe" : "yt-dlp";
+// Prefer postinstall bin/ (dev & prod), fallback to tmpdir (serverless/cold)
+const BIN_DIR = fsSync.existsSync(path.join(__dirname, "bin", YTDLP_FILENAME))
+  ? path.join(__dirname, "bin")
+  : path.join(os.tmpdir(), "peel-bin");
+const YTDLP_PATH = path.join(BIN_DIR, YTDLP_FILENAME);
 
 const MAX_URL_LENGTH = 2048;
 const MAX_CONCURRENT = 3;
@@ -36,7 +38,8 @@ if (!ffmpegPath) {
 function downloadFile(url, destPath) {
   return new Promise((resolve, reject) => {
     const file = fsSync.createWriteStream(destPath);
-    https
+    const protocol = url.startsWith("https") ? https : http;
+    protocol
       .get(url, (res) => {
         if (
           res.statusCode >= 300 &&
@@ -45,9 +48,8 @@ function downloadFile(url, destPath) {
         ) {
           file.close();
           fsSync.unlink(destPath, () => {});
-          downloadFile(res.headers.location, destPath)
-            .then(resolve)
-            .catch(reject);
+          const next = new URL(res.headers.location, url).href;
+          downloadFile(next, destPath).then(resolve).catch(reject);
           return;
         }
         if (res.statusCode !== 200) {
@@ -104,7 +106,7 @@ app.use((_req, res, next) => {
   res.setHeader("Referrer-Policy", "no-referrer");
   res.setHeader(
     "Content-Security-Policy",
-    "default-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'self'"
+    "default-src 'self'; base-uri 'self'; form-action 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'self'; connect-src 'self'"
   );
   next();
 });
@@ -130,6 +132,16 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json({ limit: "4kb" }));
+
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  message: { error: "Too many requests. Try again in a minute." },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use("/api/", apiLimiter);
+
 app.use(
   express.static(path.join(__dirname, "public"), {
     maxAge: "7d",

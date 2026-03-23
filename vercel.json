@@ -2,9 +2,6 @@
   "buildCommand": "",
   "outputDirectory": "public",
   "rewrites": [
-    { "source": "/success.html", "destination": "/success.html" },
-    { "source": "/robots.txt", "destination": "/robots.txt" },
-    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
